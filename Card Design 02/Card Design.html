@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Expandable Card with Visible Moving Arrow</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: #f0eee8;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+    padding: 40px 140px;
+    overflow-x: visible;
+  }
+
+  /* Wrapper allows overflow for arrow */
+  .card-wrapper {
+    position: relative;
+    overflow: visible;
+    display: flex;
+    align-items: center;
+  }
+
+  .card {
+    width: 250px;
+    height: 400px;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    display: flex;
+    overflow: hidden;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .card.expanded {
+    width: 650px;
+  }
+
+  .image-container {
+    position: relative;
+    width: 250px;
+    height: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.5s ease;
+  }
+
+  .card:not(.expanded):hover .image-container img {
+    transform: scale(1.15);
+  }
+
+  .stats {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+
+  .card.expanded .stats {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .stat-circle {
+    background: #1a9e9e;
+    color: white;
+    font-weight: 500;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    line-height: 1.1;
+    padding: 0 4px;
+  }
+
+  .stat-circle span {
+    font-size: 19px;
+  }
+
+  .image-info {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  max-width: 180px;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 16px 20px;
+  border-radius: 12px;
+  color: white;
+  font-size: 11px;
+  line-height: 1.4;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+
+  .card.expanded .image-info {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .image-info strong {
+    display: block;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .description-panel {
+    flex-grow: 1;
+    padding: 36px 48px;
+    background: linear-gradient(135deg, #f1d7e7 0%, #c5e4e9 100%);
+    border-radius: 0 5px 5px 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease 0.3s;
+    font-size: 14px;
+    color: #222;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 90%;
+    margin: auto 0;
+    position: relative;
+  }
+
+  .card.expanded .description-panel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .description-panel h3 {
+    font-weight: 700;
+    color: #555;
+    margin-bottom: 12px;
+    letter-spacing: 1.5px;
+    font-size: 13px;
+    text-transform: uppercase;
+  }
+
+  .description-panel h2 {
+    margin: 8px 0 18px;
+    font-weight: 900;
+    font-size: 28px;
+    color: #222;
+    letter-spacing: 0.02em;
+  }
+
+  .description-panel p {
+    margin-bottom: 5px;
+    line-height: .5;
+  }
+
+  .description-panel ul {
+    padding-left: 20px;
+    margin: 0 0 18px;
+    list-style-type: disc;
+    line-height: 1.4;
+  }
+
+  /* Arrow button positioned relative to wrapper */
+  .arrow-btn {
+    position: absolute;
+    top: 50%;
+    background: #e91e63;
+    border-radius: 50%;
+    border: none;
+    width: 36px;
+    height: 36px;
+    color: white;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20;
+    transform: translateY(-50%);
+    transition: left 0.5s ease, right 0.5s ease, background 0.3s ease;
+    right: calc(50% - 140px); /* initial near image container */
+  }
+
+  /* On expand move arrow right outside description panel */
+  .card.expanded ~ .arrow-btn {
+    left: calc(50% + 365px); /* adjusted for expanded width and padding */
+    right: auto;
+  }
+
+  .arrow-btn:hover {
+    background: #c71557;
+  }
+</style>
+</head>
+<body>
+
+<div class="card-wrapper">
+  <div class="card" id="card">
+    <div class="image-container">
+      <img src="https://i.pinimg.com/736x/b5/ab/b0/b5abb09fc9e6e9307cbf6e633f7de5c9.jpg" alt="Ford Mustang Mach 1" />
+      <div class="stats">
+        <div class="stat-circle">
+          <span>429</span>
+          Cubic
+        </div>
+        <div class="stat-circle">
+          <span>6</span>
+          Cylinders
+        </div>
+      </div>
+      <div class="image-info">
+        <strong>Ford Mustang Mach 1</strong>
+        A performance-oriented version of the Mustang, with a variety of engine options, including the 302 cubic inch (4.9L) V8 and the 429 cubic inch (7.0L) V8.
+      </div>
+    </div>
+    <div class="description-panel">
+      <h3>DESCRIPTION</h3>
+      <h2>LAUNCHED</h2>
+      <p>August 1968 for the 1969 model year</p>
+      <h2>FEATURES</h2>
+      <ul>
+        <li>5.0-liter V8 engine</li>
+        <li>480 horsepower and 420 lb-ft of torque</li>
+        <li>6-speed manual transmission or 10-speed automatic transmission</li>
+        <li>Unique suspension</li>
+        <li>Unique grille, hood, and rear spoiler</li>
+        <li>Brembo front brakes</li>
+        <li>19-inch wheels</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Arrow is sibling of card for positioning -->
+  <button class="arrow-btn" id="expandBtn">&#8250;</button>
+</div>
+
+<script>
+  const card = document.getElementById('card');
+  const expandBtn = document.getElementById('expandBtn');
+
+  expandBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  card.classList.toggle('expanded');
+  if(card.classList.contains('expanded')) {
+    expandBtn.innerHTML = '&#8249;'; // Left arrow to collapse
+    expandBtn.style.left = 'calc(50% + 305px)';
+    expandBtn.style.right = 'auto';
+  } else {
+    expandBtn.innerHTML = '&#8250;'; // Right arrow to expand
+    expandBtn.style.right = 'calc(50% - 140px)';
+    expandBtn.style.left = 'auto';
+  }
+});
+
+</script>
+
+</body>
+</html>
